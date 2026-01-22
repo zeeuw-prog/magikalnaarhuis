@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<title>Is het al dienst-einde?</title>
+<title>Komt de aflos al?</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body {
@@ -148,16 +148,36 @@ document.addEventListener("DOMContentLoaded", function() {
 
 	function update(dienst) {
 		const now = new Date();
-		let eindtijd = new Date(now);
+		let eindtijd = new Date(now); // begin met huidige datum en tijd
 
-		// Bepaal eindtijd
 		if (dienst === "ochtend") {
+			// Ochtenddienst: 06:30 – 14:30 vandaag
 			eindtijd.setHours(14,30,0,0);
+
 		} else if (dienst === "avond") {
+			// Avonddienst: 14:30 – 22:30 vandaag
 			eindtijd.setHours(22,30,0,0);
+
 		} else if (dienst === "nacht") {
-			eindtijd.setDate(now.getDate() + 1);
-			eindtijd.setHours(6,30,0,0);
+			// Nachtdienst: 22:30 – 06:30
+
+			const nowH = now.getHours();
+			const nowM = now.getMinutes();
+
+			if ((nowH > 22) || (nowH === 22 && nowM >= 30)) {
+				// 22:30 – 23:59 → dienst loopt tot morgen 06:30
+				eindtijd.setDate(eindtijd.getDate() + 1);
+				eindtijd.setHours(6,30,0,0);
+
+			} else if (nowH < 6 || (nowH === 6 && nowM < 30)) {
+				// 00:00 – 06:29 → dienst loopt tot vandaag 06:30
+				eindtijd.setHours(6,30,0,0);
+
+			} else {
+				// 06:30 – 22:29 → nachtdienst nog niet begonnen → eindtijd morgen 06:30
+				eindtijd.setDate(eindtijd.getDate() + 1);
+				eindtijd.setHours(6,30,0,0);
+			}
 		}
 
 		const verschil = eindtijd - now;
